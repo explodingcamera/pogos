@@ -1,12 +1,11 @@
 [package]
 edition = "2021"
-name = "os"
+name = "os-1"
 version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 riscv = "0.10.1"
-riscv-rt = {version = "0.11.0", features = ["s-mode"]}
 sbi = "0.2.0"
 virtio-drivers = "0.3.0"

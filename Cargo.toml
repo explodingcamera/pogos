@@ -1,4 +1,5 @@
 [workspace]
 members = [
   "os",
+  "history/os-custom-bootstrap",
 ]

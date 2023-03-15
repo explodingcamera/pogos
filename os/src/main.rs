@@ -2,35 +2,27 @@
 #![no_main]
 #![feature(panic_info_message)]
 
-use core::{arch::global_asm, panic::PanicInfo};
+extern crate riscv_rt;
 
-global_asm!(include_str!("entry.asm"));
+use core::panic::PanicInfo;
+use util::print;
+mod util;
 
-#[inline]
-fn print(t: &str) {
-    for c in t.chars() {
-        let c: u8 = c.try_into().unwrap_or(0);
-        sbi::legacy::console_putchar(c)
-    }
+use riscv_rt::entry;
+
+#[entry]
+fn main() -> ! {
+    // do something here
+    print("Started PogOs!\n");
+    panic!("Panic test");
 }
 
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
-    // Nothing here now
-    sbi::legacy::shutdown()
-}
-
-fn clear_bss() {
-    extern "C" {
-        fn sbss();
-        fn ebss();
+    print("Paniced: ");
+    if let Some(message) = _info.message() {
+        print(message.as_str().unwrap_or("Unknown panic message"));
+        print("\n");
     }
-    (sbss as usize..ebss as usize).for_each(|a| unsafe { (a as *mut u8).write_volatile(0) });
-}
-
-#[no_mangle]
-fn start() {
-    clear_bss();
-    print("Started PogOs!\n");
     sbi::legacy::shutdown()
 }
