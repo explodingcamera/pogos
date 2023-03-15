@@ -1,0 +1,11 @@
+[package]
+edition = "2021"
+name = "os"
+version = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+riscv = "0.10.1"
+sbi = "0.2.0"
+virtio-drivers = "0.3.0"
