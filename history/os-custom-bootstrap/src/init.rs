@@ -3,18 +3,18 @@ macro_rules! entry {
     ($path:path) => {
         global_asm!(include_str!("entry.asm"));
 
+        /// # Safety
+        /// This function is probably unsafe :)
         #[export_name = "__main"]
         pub unsafe fn __main() -> ! {
             // type check the given path
 
-            crate::init::__clear_bss();
+            $crate::init::__clear_bss();
             let f: fn() -> ! = $path;
             f()
         }
     };
 }
-
-pub fn __init() {}
 
 pub fn __clear_bss() {
     extern "C" {

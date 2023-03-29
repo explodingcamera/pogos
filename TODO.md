@@ -1,0 +1,6 @@
+- use buddy_system_allocator for heap allocation inside the kernel
+- create page table for user processes (SV39) [1](https://github.com/betrusted-io/xous-core/blob/main/docs/memory.mdg) [2](https://github.com/betrusted-io/xous-core/blob/main/kernel/src/mem.rs) [3](https://github.com/Ko-oK-OS/xv6-rust/tree/main/kernel/src/memory) [4](https://github.com/skyzh/core-os-riscv/blob/master/kernel/src/mem.rs)
+- interrupt handling [1](https://github.com/r3-os/r3/blob/%F0%9F%A6%86/src/r3_port_riscv/src/lib.md)
+- implement Time-sharing based multitasking
+- implement user processes
+- syscall interface

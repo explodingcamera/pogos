@@ -2,7 +2,7 @@
 target = "riscv64gc-unknown-none-elf"
 
 [target.riscv64gc-unknown-none-elf]
-runner = "qemu-system-riscv64 -m 2G -machine virt -nographic -bios ../bootloader/rustsbi-qemu.bin -serial mon:stdio -kernel"
+runner = "qemu-system-riscv64 -m 2G -machine virt -nographic -bios ./bootloader/rustsbi-qemu.bin -serial mon:stdio -kernel"
 rustflags = [
   "-Clink-arg=-Tmemory.x",
   "-Clink-arg=-Tlink.x",
