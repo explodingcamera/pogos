@@ -1,6 +1,5 @@
 [workspace]
 members = [
   "kernel",
-  "riscv-mem",
-  "history/os-custom-bootstrap",
+  "crates/riscv-mem",
 ]
