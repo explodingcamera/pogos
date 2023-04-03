@@ -10,11 +10,15 @@ static KERNEL_HEAP_ALLOCATOR: LockedHeap<32> = LockedHeap::new();
 
 #[alloc_error_handler]
 pub fn handle_alloc_error(layout: core::alloc::Layout) -> ! {
-    panic!("Heap allocation error, layout = {:?}", layout);
+    panic!(
+        "Allocator failed to allocate {} bytes with {}-byte alignment.",
+        layout.size(),
+        layout.align()
+    );
 }
 
 /// Initialize the heap allocator.
-pub unsafe fn init_heap() {
+pub unsafe fn init_kernel_heap() {
     KERNEL_HEAP_ALLOCATOR.lock().init(
         &_sheap as *const u8 as usize,
         &_heap_size as *const u8 as usize,

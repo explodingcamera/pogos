@@ -20,10 +20,12 @@ fn main() -> ! {
     // do something here
     print(STARTED);
 
-    // initialize heap for kernel
     unsafe {
-        allocator::init_heap();
+        // initialize heap for kernel
+        allocator::init_kernel_heap();
     }
+
+    // let executor = pasts::Executor::default();
 
     print_usize(1);
     panic!("Panic test");

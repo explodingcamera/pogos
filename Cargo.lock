@@ -72,7 +72,7 @@ version = "0.1.0"
 dependencies = [
  "buddy_system_allocator",
  "numtoa",
- "once_cell",
+ "pasts",
  "riscv",
  "riscv-rt",
  "sbi",
@@ -132,16 +132,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6aa2c4e539b869820a2b82e1aef6ff40aa85e65decdd5185e83fb4b1249cd00f"
 
 [[package]]
-name = "once_cell"
-version = "1.17.1"
+name = "pasts"
+version = "0.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7e5500299e16ebb147ae15a00a942af264cf3688f47923b8fc2cd5858f23ad3"
+checksum = "5f48fcb2261aeb31c8d00098235381aa8ff4fdd387e018e63aa4ffd24b0cfc8a"
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.53"
+version = "1.0.56"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba466839c78239c09faf015484e5cc04860f88242cff4d03eb038f04b4699b73"
+checksum = "2b63bdb0cd06f1f4dedf69b254734f9b45af66e4a031e42a7480257d9898b435"
 dependencies = [
  "unicode-ident",
 ]
@@ -192,6 +192,10 @@ dependencies = [
 [[package]]
 name = "riscv-mem"
 version = "0.1.0"
+dependencies = [
+ "riscv",
+ "spin",
+]
 
 [[package]]
 name = "riscv-rt"
