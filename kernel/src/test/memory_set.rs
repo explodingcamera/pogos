@@ -4,26 +4,25 @@ use crate::symbols::{
     STACK_END, STACK_START, TEXT_END, TEXT_START,
 };
 
-use super::sync::UPIntrFreeCell;
 use super::{frame_alloc, FrameTracker};
 use super::{PTEFlags, PageTable, PageTableEntry};
-use super::{PhysAddr, PhysPageNum, VirtAddr, VirtPageNum};
+use super::{PhysPageNum, VirtAddr, VirtPageNum};
 use super::{StepByOne, VPNRange};
 use alloc::collections::BTreeMap;
-use alloc::sync::Arc;
 use alloc::vec::Vec;
 use bitflags::bitflags;
 use core::arch::asm;
-use lazy_static::*;
 use riscv::register::satp;
+use spin::{Lazy, Mutex};
 
-lazy_static! {
-    pub static ref KERNEL_SPACE: Arc<UPIntrFreeCell<MemorySet>> =
-        Arc::new(unsafe { UPIntrFreeCell::new(MemorySet::new_kernel()) });
+pub static KERNEL_SPACE: Lazy<Mutex<MemorySet>> = Lazy::new(|| Mutex::new(MemorySet::new_kernel()));
+
+pub fn init_kernel_space() {
+    KERNEL_SPACE.lock().activate();
 }
 
 pub fn kernel_token() -> usize {
-    KERNEL_SPACE.exclusive_access().token()
+    KERNEL_SPACE.lock().token()
 }
 
 pub struct MemorySet {
@@ -314,7 +313,7 @@ impl MapArea {
                 ppn = PhysPageNum((vpn.0 as isize + pn_offset) as usize);
             }
         }
-        let pte_flags = PTEFlags::from_bits(self.map_perm.bits).unwrap();
+        let pte_flags = PTEFlags::from_bits(self.map_perm.bits()).unwrap();
         page_table.map(vpn, ppn, pte_flags);
     }
     pub fn unmap_one(&mut self, page_table: &mut PageTable, vpn: VirtPageNum) {
@@ -366,6 +365,7 @@ pub enum MapType {
 }
 
 bitflags! {
+    #[derive(Copy, Clone)]
     pub struct MapPermission: u8 {
         const R = 1 << 1;
         const W = 1 << 2;
@@ -376,7 +376,7 @@ bitflags! {
 
 #[allow(unused)]
 pub fn remap_test() {
-    let mut kernel_space = KERNEL_SPACE.exclusive_access();
+    let mut kernel_space = KERNEL_SPACE.lock();
     let mid_text: VirtAddr = ((TEXT_START() + TEXT_END()) / 2).into();
     let mid_rodata: VirtAddr = ((RODATA_START() + RODATA_END()) / 2).into();
     let mid_data: VirtAddr = ((DATA_START() + DATA_END()) / 2).into();

@@ -5,6 +5,7 @@ use alloc::vec::Vec;
 use bitflags::*;
 
 bitflags! {
+    #[derive(PartialEq, Eq, Clone, Copy)]
     pub struct PTEFlags: u8 {
         const V = 1 << 0;
         const R = 1 << 1;
@@ -26,7 +27,7 @@ pub struct PageTableEntry {
 impl PageTableEntry {
     pub fn new(ppn: PhysPageNum, flags: PTEFlags) -> Self {
         PageTableEntry {
-            bits: ppn.0 << 10 | flags.bits as usize,
+            bits: ppn.0 << 10 | flags.bits() as usize,
         }
     }
     pub fn empty() -> Self {
@@ -52,6 +53,7 @@ impl PageTableEntry {
     }
 }
 
+#[derive(Clone)]
 pub struct PageTable {
     root_ppn: PhysPageNum,
     frames: Vec<FrameTracker>,

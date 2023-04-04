@@ -109,8 +109,4 @@ SECTIONS
     . = ABSOLUTE(_stack_start);
     _sstack = .;
   } > REGION_STACK
-
-  /* end of kernel */
-  . = ALIGN(4K);
-  _end = .;
 }

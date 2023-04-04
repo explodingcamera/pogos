@@ -1,9 +1,4 @@
-use crate::{println, symbols::*};
-use riscv::register::satp;
-
-pub unsafe fn init_paging() {
-    debug();
-}
+use crate::println;
 
 pub unsafe fn init_mmu() {
     let r = riscv::register::satp::read();

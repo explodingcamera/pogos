@@ -7,7 +7,9 @@
 extern crate alloc;
 extern crate riscv_rt;
 
+use alloc::vec;
 use core::panic::PanicInfo;
+use riscv::register::scause::Exception;
 use sbi::system_reset::{ResetReason, ResetType};
 use util::*;
 // mod frame_alloc;
@@ -26,28 +28,26 @@ extern "C" {
 #[entry]
 fn main(hart_id: usize) -> ! {
     if hart_id != 0 {
-        println!("hart {} is not the boot hart, stopping", hart_id);
-        loop {}
+        panic!("hart {} is not the boot hart, stopping", hart_id);
     }
 
     println!("starting kernel on hart {}", hart_id);
-    let status = sbi::hsm::hart_status(hart_id).unwrap();
-    println!("hart status: {:?}", status);
-
-    symbols::debug();
 
     // Setup everything required for the kernel to run
     unsafe {
-        heap_alloc::init_kernel_heap(); // initialize the kernel heap allocator, alloc is now available
+        // initialize the kernel heap allocator, alloc is now available
+        heap_alloc::init_kernel_heap();
+
+        // initialize frame alloc, paging and mmu
         test::init();
-        // mem::init_paging();
+
+        // todo: initialize mmu here
         mem::init_mmu();
     }
 
-    // let x = vec![1, 2, 3];
-    // let executor = pasts::Executor::default();
-
-    panic!("Stopping kernel");
+    println!("kernel initialized, shutting down");
+    let _ = sbi::system_reset::system_reset(ResetType::Shutdown, ResetReason::NoReason);
+    loop {}
 }
 
 #[export_name = "DefaultHandler"]
@@ -59,6 +59,9 @@ fn default_handler() {
 fn custom_exception_handler(trap_frame: &riscv_rt::TrapFrame) -> ! {
     println!("Exception handler called");
     println!("Trap frame: {:?}", trap_frame);
+
+    let cause = riscv::register::scause::read();
+    println!("Exception cause: {:?}", cause.cause());
 
     let _ = sbi::system_reset::system_reset(ResetType::Shutdown, ResetReason::SystemFailure);
     loop {}

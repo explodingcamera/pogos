@@ -1,9 +1,7 @@
 mod address;
 mod frame_allocator;
-mod heap_allocator;
 mod memory_set;
 mod page_table;
-mod sync;
 
 pub use address::VPNRange;
 pub use address::{PhysAddr, PhysPageNum, StepByOne, VirtAddr, VirtPageNum};
@@ -17,7 +15,6 @@ pub use page_table::{
 };
 
 pub unsafe fn init() {
-    // heap_allocator::init_heap();
     frame_allocator::init_frame_allocator();
-    KERNEL_SPACE.exclusive_access().activate();
+    memory_set::init_kernel_space();
 }
