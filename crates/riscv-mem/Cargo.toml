@@ -10,5 +10,6 @@ name = "riscv_mem"
 path = "src/lib.rs"
 
 [dependencies]
+bitflags = "2"
 riscv = "0.10"
 spin = "0.9"

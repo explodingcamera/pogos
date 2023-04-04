@@ -1,9 +1,10 @@
+use super::{frame_alloc, FrameTracker, PhysAddr, PhysPageNum, StepByOne, VirtAddr, VirtPageNum};
+use alloc::string::String;
+use alloc::vec;
+use alloc::vec::Vec;
 use bitflags::*;
 
-use crate::address::PhysPageNum;
-
 bitflags! {
-    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
     pub struct PTEFlags: u8 {
         const V = 1 << 0;
         const R = 1 << 1;
@@ -15,6 +16,7 @@ bitflags! {
         const D = 1 << 7;
     }
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PageTableEntry {
@@ -24,7 +26,7 @@ pub struct PageTableEntry {
 impl PageTableEntry {
     pub fn new(ppn: PhysPageNum, flags: PTEFlags) -> Self {
         PageTableEntry {
-            bits: ppn.0 << 10 | flags.bits() as usize,
+            bits: ppn.0 << 10 | flags.bits as usize,
         }
     }
     pub fn empty() -> Self {
@@ -50,7 +52,6 @@ impl PageTableEntry {
     }
 }
 
-/*
 pub struct PageTable {
     root_ppn: PhysPageNum,
     frames: Vec<FrameTracker>,
@@ -246,4 +247,3 @@ impl Iterator for UserBufferIterator {
         }
     }
 }
- */
