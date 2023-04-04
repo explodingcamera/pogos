@@ -1,5 +1,3 @@
-https://github.com/chyyuu/os_kernel_lab/tree/main/os/src/mm !!!!!!!
-
 # resources
 
 - https://github.com/rcore-os/rCore-Tutorial-v3

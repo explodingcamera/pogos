@@ -1,5 +1,3 @@
-use riscv::register::satp;
-
 use crate::println;
 
 pub mod frame_alloc;

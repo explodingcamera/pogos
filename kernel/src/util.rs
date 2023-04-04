@@ -22,7 +22,7 @@ impl core::fmt::Write for Writer {
 
 pub fn print(t: &str) {
     t.chars().for_each(|c| {
-        let c: u8 = c.try_into().unwrap_or('?' as u8);
+        let c: u8 = c.try_into().unwrap_or(b'?');
         sbi::legacy::console_putchar(c)
     });
 }

@@ -46,7 +46,7 @@ fn main(hart_id: usize) -> ! {
 
     println!("kernel initialized, shutting down");
     let _ = sbi::system_reset::system_reset(ResetType::Shutdown, ResetReason::NoReason);
-    loop {}
+    unreachable!("System reset failed");
 }
 
 #[export_name = "DefaultHandler"]
@@ -63,7 +63,7 @@ fn custom_exception_handler(trap_frame: &riscv_rt::TrapFrame) -> ! {
     println!("Exception cause: {:?}", cause.cause());
 
     let _ = sbi::system_reset::system_reset(ResetType::Shutdown, ResetReason::SystemFailure);
-    loop {}
+    unreachable!("System reset failed");
 }
 
 #[panic_handler]
@@ -85,5 +85,5 @@ fn panic(info: &PanicInfo) -> ! {
     );
 
     let _ = sbi::system_reset::system_reset(ResetType::Shutdown, ResetReason::SystemFailure);
-    loop {}
+    unreachable!("System reset failed");
 }

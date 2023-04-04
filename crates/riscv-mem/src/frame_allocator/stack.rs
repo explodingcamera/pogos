@@ -4,6 +4,7 @@ use crate::address::PhysPageNum;
 
 use super::FrameAllocator;
 
+#[derive(Debug, Default)]
 pub struct StackFrameAllocator {
     current: usize,
     end: usize,

@@ -1,3 +1,5 @@
+#![allow(non_snake_case, dead_code)]
+
 extern "C" {
     pub static _stext: u8;
     pub static _etext: u8;

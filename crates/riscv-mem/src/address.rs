@@ -19,7 +19,7 @@ pub struct PhysAddr(pub usize);
 pub struct VirtAddr(pub usize);
 
 #[repr(C)]
-#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
+#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Default)]
 pub struct PhysPageNum(pub usize);
 
 #[repr(C)]

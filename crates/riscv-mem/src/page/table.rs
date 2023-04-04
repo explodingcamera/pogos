@@ -8,7 +8,7 @@ use alloc::vec::Vec;
 
 use super::{PTEFlags, PageTableEntry};
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct PageTable {
     root_ppn: PhysPageNum,
     frames: Vec<FrameTracker>,
@@ -173,6 +173,9 @@ impl UserBuffer {
             total += b.len();
         }
         total
+    }
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 
