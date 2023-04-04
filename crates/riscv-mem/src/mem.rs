@@ -3,11 +3,12 @@ use crate::address::StepByOne;
 use crate::address::VPNRange;
 use crate::address::VirtAddr;
 use crate::address::VirtPageNum;
+use crate::frame_allocator::FrameAllocator;
 use crate::frame_allocator::FrameTracker;
+use crate::get_frame_allocator;
 use crate::page::PTEFlags;
 use crate::page::PageTable;
 use crate::page::PageTableEntry;
-use crate::GLOBAL_FRAME_ALLOCATOR;
 use crate::PAGE_SIZE;
 use alloc::collections::BTreeMap;
 use alloc::vec::Vec;
@@ -208,7 +209,7 @@ impl MapArea {
                 ppn = PhysPageNum(vpn.0);
             }
             MapType::Framed => {
-                let frame = GLOBAL_FRAME_ALLOCATOR.get().unwrap().frame_alloc().unwrap();
+                let frame = get_frame_allocator().frame_alloc().unwrap();
                 ppn = frame.ppn;
                 self.data_frames.insert(vpn, frame);
             }

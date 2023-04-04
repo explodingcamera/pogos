@@ -1,4 +1,4 @@
-use crate::{address::PhysPageNum, GLOBAL_FRAME_ALLOCATOR};
+use crate::{address::PhysPageNum, get_frame_allocator};
 use alloc::vec::Vec;
 use core::fmt::{self, Debug, Formatter};
 
@@ -30,29 +30,7 @@ impl Debug for FrameTracker {
 
 impl Drop for FrameTracker {
     fn drop(&mut self) {
-        GLOBAL_FRAME_ALLOCATOR
-            .get()
-            .unwrap()
-            .frame_dealloc(self.ppn);
-    }
-}
-
-pub trait WrappedFrameAllocator: Send + Sync + 'static {
-    fn alloc(&self) -> Option<PhysPageNum>;
-    fn alloc_more(&self, pages: usize) -> Option<Vec<PhysPageNum>>;
-    fn dealloc(&self, ppn: PhysPageNum);
-
-    fn frame_alloc(&self) -> Option<FrameTracker> {
-        self.alloc().map(FrameTracker::new)
-    }
-
-    fn frame_alloc_more(&self, num: usize) -> Option<Vec<FrameTracker>> {
-        self.alloc_more(num)
-            .map(|x| x.iter().map(|&t| FrameTracker::new(t)).collect())
-    }
-
-    fn frame_dealloc(&self, ppn: PhysPageNum) {
-        self.dealloc(ppn);
+        get_frame_allocator().frame_dealloc(self.ppn);
     }
 }
 

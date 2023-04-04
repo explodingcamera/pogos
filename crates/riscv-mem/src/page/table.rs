@@ -1,6 +1,6 @@
 use crate::address::{PhysAddr, PhysPageNum, StepByOne, VirtAddr, VirtPageNum};
-use crate::frame_allocator::FrameTracker;
-use crate::GLOBAL_FRAME_ALLOCATOR;
+use crate::frame_allocator::{FrameAllocator, FrameTracker};
+use crate::get_frame_allocator;
 
 use alloc::string::String;
 use alloc::vec;
@@ -18,7 +18,7 @@ pub struct PageTable {
 impl PageTable {
     pub fn new() -> Self {
         // TODO
-        let frame = GLOBAL_FRAME_ALLOCATOR.get().unwrap().frame_alloc().unwrap();
+        let frame = get_frame_allocator().frame_alloc().unwrap();
 
         PageTable {
             root_ppn: frame.ppn,
@@ -45,7 +45,7 @@ impl PageTable {
                 break;
             }
             if !pte.is_valid() {
-                let frame = GLOBAL_FRAME_ALLOCATOR.get().unwrap().frame_alloc().unwrap();
+                let frame = get_frame_allocator().frame_alloc().unwrap();
                 *pte = PageTableEntry::new(frame.ppn, PTEFlags::V);
                 self.frames.push(frame);
             }
