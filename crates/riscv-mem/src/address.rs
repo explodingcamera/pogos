@@ -1,9 +1,8 @@
-const PAGE_SIZE: usize = 4096;
-const PAGE_SIZE_BITS: usize = 12;
-
-use core::fmt::{self, Debug, Formatter};
+pub const PAGE_SIZE: usize = 4096;
+pub const PAGE_SIZE_BITS: usize = 12;
 
 use crate::page::PageTableEntry;
+use core::fmt::{self, Debug, Formatter};
 
 const PA_WIDTH_SV39: usize = 56;
 const VA_WIDTH_SV39: usize = 39;
@@ -138,6 +137,7 @@ impl PhysAddr {
         self.page_offset() == 0
     }
 }
+
 impl From<PhysAddr> for PhysPageNum {
     fn from(v: PhysAddr) -> Self {
         assert_eq!(v.page_offset(), 0);

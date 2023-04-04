@@ -7,16 +7,12 @@
 extern crate alloc;
 extern crate riscv_rt;
 
-use alloc::vec;
 use core::panic::PanicInfo;
-use riscv::register::scause::Exception;
 use sbi::system_reset::{ResetReason, ResetType};
 use util::*;
-// mod frame_alloc;
-mod heap_alloc;
+
 mod mem;
 mod symbols;
-mod test;
 mod util;
 
 use riscv_rt::entry;
@@ -36,10 +32,13 @@ fn main(hart_id: usize) -> ! {
     // Setup everything required for the kernel to run
     unsafe {
         // initialize the kernel heap allocator, alloc is now available
-        heap_alloc::init_kernel_heap();
+        mem::heap_alloc::init_kernel_heap();
 
-        // initialize frame alloc, paging and mmu
-        test::init();
+        // initialize the frame allocator
+        mem::frame_alloc::init_frame_allocator();
+
+        // initialize the kernel memory map
+        mem::map_kernel::init_kernel_memory_map();
 
         // todo: initialize mmu here
         mem::init_mmu();

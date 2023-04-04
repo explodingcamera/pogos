@@ -1,5 +1,3 @@
-use crate::println;
-
 extern "C" {
     pub static _stext: u8;
     pub static _etext: u8;
@@ -21,9 +19,6 @@ extern "C" {
 
     pub static _end: u8;
 }
-
-pub const PAGE_SIZE: usize = 4096;
-pub const PAGE_SIZE_BITS: usize = 12;
 
 pub fn MEMORY_START() -> usize {
     unsafe { &_memory_start as *const _ as usize }

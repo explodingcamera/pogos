@@ -78,6 +78,7 @@ version = "0.1.0"
 dependencies = [
  "bitflags 2.0.2",
  "buddy_system_allocator",
+ "lock_api",
  "numtoa",
  "pasts",
  "riscv",
@@ -209,6 +210,7 @@ name = "riscv-mem"
 version = "0.1.0"
 dependencies = [
  "bitflags 2.0.2",
+ "lock_api",
  "riscv",
  "spin",
 ]

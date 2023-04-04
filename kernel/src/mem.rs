@@ -1,4 +1,10 @@
+use riscv::register::satp;
+
 use crate::println;
+
+pub mod frame_alloc;
+pub mod heap_alloc;
+pub mod map_kernel;
 
 pub unsafe fn init_mmu() {
     let r = riscv::register::satp::read();
