@@ -1,16 +1,16 @@
 MEMORY
 {
-  RAM : ORIGIN = 0x80200000, LENGTH = 32M
+  RAM : ORIGIN = 0x80200000, LENGTH = 16M
 }
 
 REGION_ALIAS("REGION_TEXT", RAM);
 REGION_ALIAS("REGION_RODATA", RAM);
 REGION_ALIAS("REGION_DATA", RAM);
 REGION_ALIAS("REGION_BSS", RAM);
-REGION_ALIAS("REGION_HEAP", RAM);
 REGION_ALIAS("REGION_STACK", RAM);
 
-/* _heap_size = 16M; */
+/* REGION_ALIAS("REGION_HEAP", RAM); */
+/* _heap_size = 8M; */
 
 _srodata = ADDR(.rodata);
 _erodata = ADDR(.rodata) + SIZEOF(.rodata);
@@ -94,13 +94,13 @@ SECTIONS
   } > REGION_BSS
 
   /* fictitious region that represents the memory available for the heap */
-  .heap (NOLOAD) :
+  /* .heap (NOLOAD) :
   {
     _sheap = .;
     . += _heap_size;
     . = ALIGN(4K);
     _eheap = .;
-  } > REGION_HEAP
+  } > REGION_HEAP */
 
   /* fictitious region that represents the memory available for the stack */
   .stack (NOLOAD) :
@@ -109,4 +109,8 @@ SECTIONS
     . = ABSOLUTE(_stack_start);
     _sstack = .;
   } > REGION_STACK
+
+  /* end of kernel */
+  . = ALIGN(4K);
+  _end = .;
 }

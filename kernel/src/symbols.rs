@@ -14,8 +14,9 @@ extern "C" {
     pub static _sbss: u8;
     pub static _ebss: u8;
 
-    pub static _sheap: u8;
-    pub static _heap_size: u8;
+    // pub static _sheap: u8;
+    // pub static _eheap: u8;
+    // pub static _heap_size: u8;
 
     pub static _sstack: u8;
     pub static _estack: u8;
@@ -69,13 +70,17 @@ pub fn BSS_END() -> usize {
     unsafe { &_ebss as *const _ as usize }
 }
 
-pub fn HEAP_START() -> usize {
-    unsafe { &_sheap as *const _ as usize }
-}
+// pub fn HEAP_START() -> usize {
+//     unsafe { &_sheap as *const _ as usize }
+// }
 
-pub fn HEAP_SIZE() -> usize {
-    unsafe { &_heap_size as *const _ as usize }
-}
+// pub fn HEAP_END() -> usize {
+//     unsafe { &_eheap as *const _ as usize }
+// }
+
+// pub fn HEAP_SIZE() -> usize {
+//     unsafe { &_heap_size as *const _ as usize }
+// }
 
 pub fn STACK_START() -> usize {
     unsafe { &_sstack as *const _ as usize }
@@ -95,9 +100,10 @@ pub fn debug() {
     println!("Kernel data: {:#x} - {:#x}", DATA_START(), DATA_END() - 1);
     println!("Kernel bss: {:#x} - {:#x}", BSS_START(), BSS_END() - 1);
     // println!(
-    //     "Kernel heap: {:#x} - {:#x}",
+    //     "Kernel heap: {:#x}  - {:#x} (size: {:#x})",
     //     HEAP_START(),
-    //     HEAP_START() + HEAP_SIZE() - 1
+    //     HEAP_END() - 1,
+    //     HEAP_SIZE()
     // );
     println!(
         "Kernel stack: {:#x} - {:#x}",

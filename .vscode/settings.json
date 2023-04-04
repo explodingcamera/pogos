@@ -1,4 +1,5 @@
 {
   "rust-analyzer.cargo.target": "riscv64gc-unknown-none-elf",
-  "rust-analyzer.checkOnSave.allTargets": false
+  "rust-analyzer.checkOnSave.allTargets": false,
+  "rust-analyzer.showUnlinkedFileNotification": false
 }

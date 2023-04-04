@@ -11,7 +11,7 @@ use core::panic::PanicInfo;
 use sbi::system_reset::{ResetReason, ResetType};
 use util::*;
 // mod frame_alloc;
-// mod heap_alloc;
+mod heap_alloc;
 mod mem;
 mod symbols;
 mod test;
@@ -38,7 +38,7 @@ fn main(hart_id: usize) -> ! {
 
     // Setup everything required for the kernel to run
     unsafe {
-        // heap_allocator::init_kernel_heap(); // initialize the kernel heap allocator, alloc is now available
+        heap_alloc::init_kernel_heap(); // initialize the kernel heap allocator, alloc is now available
         test::init();
         // mem::init_paging();
         mem::init_mmu();
