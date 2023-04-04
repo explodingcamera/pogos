@@ -1,6 +1,6 @@
 MEMORY
 {
-  RAM : ORIGIN = 0x80200000, LENGTH = 64M
+  RAM : ORIGIN = 0x80200000, LENGTH = 32M
 }
 
 REGION_ALIAS("REGION_TEXT", RAM);
@@ -10,5 +10,8 @@ REGION_ALIAS("REGION_BSS", RAM);
 REGION_ALIAS("REGION_HEAP", RAM);
 REGION_ALIAS("REGION_STACK", RAM);
 
-_heap_size = 32M;
-KERNEL_END = ORIGIN(RAM) + LENGTH(RAM);
+_heap_size = 16M;
+
+_srodata = ADDR(.rodata);
+_erodata = ADDR(.rodata) + SIZEOF(.rodata);
+_etext = ADDR(.text) + SIZEOF(.text);

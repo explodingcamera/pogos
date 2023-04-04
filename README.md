@@ -1,3 +1,5 @@
+https://github.com/chyyuu/os_kernel_lab/tree/main/os/src/mm !!!!!!!
+
 # resources
 
 - https://github.com/rcore-os/rCore-Tutorial-v3
@@ -24,3 +26,9 @@
   - [xous](https://github.com/betrusted-io/xous-core) - security focused OS
   - [r3](https://github.com/r3-os/r3) - realtime OS
   - [zCore](https://github.com/rcore-os/zCore) - zircon reimplementation in rust
+
+# License
+
+This project is licensed under the Apache License, Version 2.0. See the [LICENSE](LICENSE) file for details.
+
+Some code in the `crates/riscv-mem` directory is licensed under the GPL-3.0 license. See the [LICENSE.md](crates/riscv-mem/LICENSE.md) file for details.

@@ -1,14 +1,28 @@
-use numtoa::NumToA;
-
-#[inline]
-pub fn print(t: &str) {
-    for c in t.chars() {
-        let c: u8 = c.try_into().unwrap_or(0);
-        sbi::legacy::console_putchar(c)
+#[macro_export]
+macro_rules! println {
+    ($fmt:literal$(, $($arg: tt)+)?) => {
+        $crate::util::print_args(format_args!(concat!($fmt, "\n") $(,$($arg)+)?));
     }
 }
 
-pub fn print_usize(u: usize) {
-    let mut buf = [0u8; 20];
-    print(u.numtoa_str(10, &mut buf));
+struct Writer {}
+
+pub fn print_args(t: core::fmt::Arguments) {
+    use core::fmt::Write;
+    let mut writer = Writer {};
+    writer.write_fmt(t).unwrap();
+}
+
+impl core::fmt::Write for Writer {
+    fn write_str(&mut self, s: &str) -> core::fmt::Result {
+        print(s);
+        Ok(())
+    }
+}
+
+pub fn print(t: &str) {
+    t.chars().for_each(|c| {
+        let c: u8 = c.try_into().unwrap_or('?' as u8);
+        sbi::legacy::console_putchar(c)
+    });
 }
