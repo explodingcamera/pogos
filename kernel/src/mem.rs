@@ -6,7 +6,7 @@ pub mod map_kernel;
 
 pub unsafe fn init_mmu() {
     let r = riscv::register::satp::read();
-    println!("satp: {:?}", r);
+    // println!("satp: {:?}", r);
 
     // unsafe {
     //     riscv::register::satp::set(satp::Mode::Sv39, 0, root_ppn);

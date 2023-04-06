@@ -18,7 +18,7 @@ pub fn init_kernel_memory_map() {
         Arc::new(kernel_map)
     });
 
-    println!("kernel memory map activated");
+    println!(">>> kernel memory map activated");
 }
 
 pub fn kernel_virt_to_phys(vaddr: usize) -> usize {
@@ -36,7 +36,7 @@ pub fn kernel_virt_to_phys(vaddr: usize) -> usize {
 fn new_kernel() -> MemorySet {
     let mut memory_set = MemorySet::new_bare();
 
-    println!("mapping .text section");
+    // println!("mapping .text section");
     memory_set.push(
         MapArea::new(
             (TEXT_START()).into(),
@@ -46,11 +46,11 @@ fn new_kernel() -> MemorySet {
         ),
         None,
     );
-    println!(
-        "mapping .rodata section from {:#x} to {:#x}",
-        (RODATA_START()),
-        (RODATA_END())
-    );
+    // println!(
+    //     "mapping .rodata section from {:#x} to {:#x}",
+    //     (RODATA_START()),
+    //     (RODATA_END())
+    // );
 
     memory_set.push(
         MapArea::new(
@@ -62,7 +62,7 @@ fn new_kernel() -> MemorySet {
         None,
     );
 
-    println!("mapping .data section");
+    // println!("mapping .data section");
     memory_set.push(
         MapArea::new(
             (DATA_START()).into(),
@@ -73,7 +73,7 @@ fn new_kernel() -> MemorySet {
         None,
     );
 
-    println!("mapping .bss section");
+    // println!("mapping .bss section");
     memory_set.push(
         MapArea::new(
             // (sbss_with_stack as usize).into(),
@@ -86,7 +86,7 @@ fn new_kernel() -> MemorySet {
     );
 
     // map stack
-    println!("mapping stack");
+    // println!("mapping stack");
     memory_set.push(
         MapArea::new(
             (STACK_END()).into(),
@@ -97,7 +97,7 @@ fn new_kernel() -> MemorySet {
         None,
     );
 
-    println!("mapping physical memory");
+    // println!("mapping physical memory");
     memory_set.push(
         MapArea::new(
             (STACK_START()).into(),
@@ -108,7 +108,7 @@ fn new_kernel() -> MemorySet {
         None,
     );
 
-    println!("mapping memory-mapped registers");
+    // println!("mapping memory-mapped registers");
     for (start, end) in MMIO_DEVICES {
         memory_set.push(
             MapArea::new(

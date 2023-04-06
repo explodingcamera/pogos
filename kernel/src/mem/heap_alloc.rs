@@ -22,10 +22,5 @@ pub unsafe fn init_kernel_heap() {
     let heap_start = KERNEL_HEAP.as_ptr() as usize;
     let heap_size = KERNEL_HEAP.len();
 
-    println!(
-        "KernelHeap: start: {:#x}, size: {:#x}",
-        heap_start, heap_size
-    );
-
     KERNEL_HEAP_ALLOCATOR.lock().init(heap_start, heap_size);
 }
