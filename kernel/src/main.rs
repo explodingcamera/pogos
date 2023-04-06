@@ -15,12 +15,15 @@ mod panic_handler;
 mod trap;
 
 mod io;
+mod ksched;
 mod mem;
 mod symbols;
+mod tasks;
 mod util;
 
-use alloc::string::String;
+use alloc::{boxed::Box, string::String, vec, vec::Vec};
 use riscv_rt::entry;
+use tasks::Fuse;
 
 #[entry]
 fn main(hart_id: usize) -> ! {
@@ -29,7 +32,7 @@ fn main(hart_id: usize) -> ! {
     }
 
     println!();
-    println!("== starting kernel on hart {} ==", hart_id);
+    println!("== starting pogos kernel on hart {} ==", hart_id);
     println!();
 
     // Setup everything required for the kernel to run
@@ -51,56 +54,11 @@ fn main(hart_id: usize) -> ! {
         println!(">>> mmu enabled");
     }
 
-    println!("kernel initialized, starting kernel shell\n");
-    println!("type 'help' for a list of available commands");
+    println!("kernel initialized, starting kschedule\n");
 
-    // prompt
-    print!("> ");
+    ksched::KernelScheduler::new()
+        .with_task(Box::pin(async { tasks::console().await }.fuse()))
+        .block_on_run();
 
-    let mut command = String::new();
-    loop {
-        match sbi::legacy::console_getchar() {
-            Some(12) => {
-                // clear screen
-                print!("\x1b[2J\x1b[1;1H");
-                print!("> ");
-            }
-            Some(13) => {
-                println!();
-                process_command(&command);
-                command.clear();
-                print!("> ");
-            }
-            Some(127) => {
-                if command.len() > 0 {
-                    command.pop();
-                    print!("{}", 127 as char)
-                }
-            }
-            Some(c) => {
-                if c >= 32 && c <= 126 {
-                    command.push(c as char);
-                    print!("{}", c as char);
-                } else {
-                    print!("\nchar code: {}", c);
-                }
-            }
-            None => {}
-        }
-    }
-}
-
-fn process_command(command: &str) {
-    match command {
-        "help" | "?" | "h" => {
-            println!("available commands:");
-            println!("  help      print this help message  (alias: h, ?)");
-            println!("  shutdown  shutdown the machine     (alias: sd, exit)");
-        }
-        "shutdown" | "sd" | "exit" => util::shutdown(),
-        "" => {}
-        _ => {
-            println!("unknown command: {command}");
-        }
-    };
+    util::shutdown()
 }

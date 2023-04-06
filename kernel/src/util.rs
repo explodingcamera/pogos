@@ -1,10 +1,12 @@
+use core::{future::Future, pin::Pin, task::Poll};
+
 use riscv::register::medeleg::{clear_machine_env_call, set_supervisor_env_call};
 use sbi::ecall3;
 
 #[macro_export]
 macro_rules! print {
     ($fmt:literal$(, $($arg: tt)+)?) => {
-        $crate::util::print_args(format_args!($fmt $(,$($arg)+)?));
+        $crate::util::print_args(format_args!($fmt $(,$($arg)+)?))
     }
 }
 
@@ -47,6 +49,25 @@ pub fn print(t: &str) {
         let c: u8 = c.try_into().unwrap_or(b'?');
         sbi::legacy::console_putchar(c)
     });
+}
+
+struct DebugConsole();
+impl Future for DebugConsole {
+    type Output = u8;
+
+    fn poll(self: Pin<&mut Self>, cx: &mut core::task::Context<'_>) -> Poll<Self::Output> {
+        match sbi::legacy::console_getchar() {
+            Some(c) => Poll::Ready(c),
+            None => {
+                cx.waker().wake_by_ref();
+                Poll::Pending
+            }
+        }
+    }
+}
+
+pub async fn get_char() -> u8 {
+    DebugConsole().await
 }
 
 // Not supported yet by any SBI implementation

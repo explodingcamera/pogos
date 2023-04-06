@@ -6,14 +6,13 @@ version = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bitflags = "2"
 buddy_system_allocator = "0.9.0"
-lock_api = "0.4.9"
-numtoa = "0.2.4"
 pasts = {version = "0.14", default-features = false}
-riscv = {version = "0.10", features = ["critical-section-single-hart"]}
+riscv = {version = "0.10"}
 riscv-mem = {path = "../crates/riscv-mem"}
 riscv-rt = {version = "0.11", features = ["s-mode"]}
 sbi = "0.2"
+
+critical-section = {version = "1.1", default-features = false}
+portable-atomic = {version = "1.2", default-features = false, features = ["critical-section"]}
 spin = {version = "0.9", features = ["portable_atomic"]}
-virtio-drivers = {version = "0.3.0", features = ["alloc"]}
