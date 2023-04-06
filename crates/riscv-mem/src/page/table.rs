@@ -93,7 +93,7 @@ impl PageTable {
             (aligned_pa_usize + offset).into()
         })
     }
-    pub fn token(&self) -> usize {
+    pub fn root_token(&self) -> usize {
         8usize << 60 | self.root_ppn.0
     }
 

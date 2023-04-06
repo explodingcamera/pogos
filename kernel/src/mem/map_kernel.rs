@@ -1,17 +1,36 @@
-use riscv_mem::mem::{MapArea, MapPermission, MapType, MemorySet};
-
-use crate::{
-    println,
-    symbols::{
-        BSS_END, BSS_START, DATA_END, DATA_START, MEMORY_END, RODATA_END, RODATA_START, STACK_END,
-        STACK_START, TEXT_END, TEXT_START,
-    },
+use alloc::sync::Arc;
+use riscv_mem::{
+    address::VirtAddr,
+    mem::{MapArea, MapPermission, MapType, MemorySet},
+    page::PageTable,
 };
+use spin::{Mutex, Once};
+
+use crate::{io::MMIO_DEVICES, println, symbols::*};
+
+// TODO: this might have issues with multiple cores and interrupts
+pub static KERNEL_SPACE: Once<Arc<MemorySet>> = Once::new();
 
 pub fn init_kernel_memory_map() {
-    let kernel_map = new_kernel();
-    kernel_map.activate();
+    KERNEL_SPACE.call_once(|| {
+        let kernel_map = new_kernel();
+        kernel_map.activate();
+        Arc::new(kernel_map)
+    });
+
     println!("kernel memory map activated");
+}
+
+pub fn kernel_virt_to_phys(vaddr: usize) -> usize {
+    PageTable::from_token(
+        KERNEL_SPACE
+            .get()
+            .expect("kernel memory map not initialized")
+            .root_token(),
+    )
+    .translate_va(VirtAddr::from(vaddr))
+    .unwrap()
+    .0
 }
 
 fn new_kernel() -> MemorySet {
@@ -89,17 +108,18 @@ fn new_kernel() -> MemorySet {
         None,
     );
 
-    // //println!("mapping memory-mapped registers");
-    // for pair in MMIO {
-    //     memory_set.push(
-    //         MapArea::new(
-    //             (*pair).0.into(),
-    //             ((*pair).0 + (*pair).1).into(),
-    //             MapType::Identical,
-    //             MapPermission::R | MapPermission::W,
-    //         ),
-    //         None,
-    //     );
-    // }
+    println!("mapping memory-mapped registers");
+    for (start, end) in MMIO_DEVICES {
+        memory_set.push(
+            MapArea::new(
+                start.into(),
+                (start + end).into(),
+                MapType::Identical,
+                MapPermission::R | MapPermission::W,
+            ),
+            None,
+        );
+    }
+
     memory_set
 }

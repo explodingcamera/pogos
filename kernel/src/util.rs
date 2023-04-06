@@ -1,8 +1,24 @@
 #[macro_export]
+macro_rules! print {
+    ($fmt:literal$(, $($arg: tt)+)?) => {
+        $crate::util::print_args(format_args!($fmt $(,$($arg)+)?));
+    }
+}
+
+#[macro_export]
 macro_rules! println {
     ($fmt:literal$(, $($arg: tt)+)?) => {
-        $crate::util::print_args(format_args!(concat!($fmt, "\n") $(,$($arg)+)?));
+        $crate::print!($fmt $(,$($arg)+)?);
+        $crate::util::print("\n");
     }
+}
+
+pub fn shutdown() -> ! {
+    let _ = sbi::system_reset::system_reset(
+        sbi::system_reset::ResetType::Shutdown,
+        sbi::system_reset::ResetReason::NoReason,
+    );
+    unreachable!("System reset failed");
 }
 
 struct Writer {}

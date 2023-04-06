@@ -6,6 +6,7 @@
 - https://wiki.osdev.org/Rust
 - https://interrupt.memfault.com/blog/zero-to-main-rust-1
 - https://docs.rust-embedded.org/embedonomicon/main.html
+- https://matklad.github.io/2020/01/02/spinlocks-considered-harmful.html locking
 
 # other risc-v rust OSes
 

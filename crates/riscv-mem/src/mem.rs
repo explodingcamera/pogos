@@ -16,16 +16,6 @@ use bitflags::bitflags;
 use riscv::asm::sfence_vma_all;
 use riscv::register::satp;
 
-// pub static KERNEL_SPACE: Once<Mutex<MemorySet>> = Once::new();
-
-// pub fn init_kernel_space() {
-//     KERNEL_SPACE.call_once(|| {
-//         let kernel_space = MemorySet::new_kernel();
-//         kernel_space.activate();
-//         Mutex::new(kernel_space)
-//     });
-// }
-
 pub struct MemorySet {
     page_table: PageTable,
     areas: Vec<MapArea>,
@@ -41,6 +31,10 @@ impl MemorySet {
 
     pub fn root_ppn(&self) -> PhysPageNum {
         self.page_table.root_ppn()
+    }
+
+    pub fn root_token(&self) -> usize {
+        self.page_table.root_token()
     }
 
     /// Assume that no conflicts.

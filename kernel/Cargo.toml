@@ -16,4 +16,4 @@ riscv-mem = {path = "../crates/riscv-mem"}
 riscv-rt = {version = "0.11", features = ["s-mode"]}
 sbi = "0.2"
 spin = {version = "0.9", features = ["portable_atomic"]}
-virtio-drivers = "0.3.0"
+virtio-drivers = {version = "0.3.0", features = ["alloc"]}
