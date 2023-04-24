@@ -1,6 +1,5 @@
 use crate::address::{PhysAddr, PhysPageNum, StepByOne, VirtAddr, VirtPageNum};
-use crate::frame_allocator::{FrameAllocator, FrameTracker};
-use crate::get_frame_allocator;
+use crate::frame_allocator::{self, FrameAllocFn, FrameAllocator, FrameTracker};
 
 use alloc::string::String;
 use alloc::vec;
@@ -8,29 +7,31 @@ use alloc::vec::Vec;
 
 use super::{PTEFlags, PageTableEntry};
 
-#[derive(Clone, Default)]
+#[derive(Clone)]
 pub struct PageTable {
     root_ppn: PhysPageNum,
     frames: Vec<FrameTracker>,
+    allocate_frame: FrameAllocFn,
 }
 
 /// Assume that it won't oom when creating/mapping.
 impl PageTable {
-    pub fn new() -> Self {
-        // TODO
-        let frame = get_frame_allocator().frame_alloc().unwrap();
+    pub fn new(allocate_frame: FrameAllocFn) -> Self {
+        let frame = allocate_frame().expect("oom when creating page table");
 
         PageTable {
             root_ppn: frame.ppn,
             frames: vec![frame],
+            allocate_frame,
         }
     }
 
     /// Temporarily used to get arguments from user space.
-    pub fn from_token(satp: usize) -> Self {
+    pub fn new_from_token(satp: usize, allocate_frame: FrameAllocFn) -> Self {
         Self {
             root_ppn: PhysPageNum::from(satp & ((1usize << 44) - 1)),
             frames: Vec::new(),
+            allocate_frame,
         }
     }
 
@@ -45,7 +46,7 @@ impl PageTable {
                 break;
             }
             if !pte.is_valid() {
-                let frame = get_frame_allocator().frame_alloc().unwrap();
+                let frame = (self.allocate_frame)().expect("failed to allocate frame");
                 *pte = PageTableEntry::new(frame.ppn, PTEFlags::V);
                 self.frames.push(frame);
             }
@@ -102,8 +103,13 @@ impl PageTable {
     }
 }
 
-pub fn translated_byte_buffer(token: usize, ptr: *const u8, len: usize) -> Vec<&'static mut [u8]> {
-    let page_table = PageTable::from_token(token);
+pub fn translated_byte_buffer(
+    token: usize,
+    ptr: *const u8,
+    len: usize,
+    allocate_frame: FrameAllocFn,
+) -> Vec<&'static mut [u8]> {
+    let page_table = PageTable::new_from_token(token, allocate_frame);
     let mut start = ptr as usize;
     let end = start + len;
     let mut v = Vec::new();
@@ -125,8 +131,8 @@ pub fn translated_byte_buffer(token: usize, ptr: *const u8, len: usize) -> Vec<&
 }
 
 /// Load a string from other address spaces into kernel space without an end `\0`.
-pub fn translated_str(token: usize, ptr: *const u8) -> String {
-    let page_table = PageTable::from_token(token);
+pub fn translated_str(token: usize, ptr: *const u8, allocate_frame: FrameAllocFn) -> String {
+    let page_table = PageTable::new_from_token(token, allocate_frame);
     let mut string = String::new();
     let mut va = ptr as usize;
     loop {
@@ -143,16 +149,20 @@ pub fn translated_str(token: usize, ptr: *const u8) -> String {
     string
 }
 
-pub fn translated_ref<T>(token: usize, ptr: *const T) -> &'static T {
-    let page_table = PageTable::from_token(token);
+pub fn translated_ref<T>(token: usize, ptr: *const T, allocate_frame: FrameAllocFn) -> &'static T {
+    let page_table = PageTable::new_from_token(token, allocate_frame);
     page_table
         .translate_va(VirtAddr::from(ptr as usize))
         .unwrap()
         .get_ref()
 }
 
-pub fn translated_refmut<T>(token: usize, ptr: *mut T) -> &'static mut T {
-    let page_table = PageTable::from_token(token);
+pub fn translated_refmut<T>(
+    token: usize,
+    ptr: *mut T,
+    allocate_frame: FrameAllocFn,
+) -> &'static mut T {
+    let page_table = PageTable::new_from_token(token, allocate_frame);
     page_table
         .translate_va(VirtAddr::from(ptr as usize))
         .unwrap()

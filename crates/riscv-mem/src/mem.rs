@@ -3,9 +3,8 @@ use crate::address::StepByOne;
 use crate::address::VPNRange;
 use crate::address::VirtAddr;
 use crate::address::VirtPageNum;
-use crate::frame_allocator::FrameAllocator;
+use crate::frame_allocator::FrameAllocFn;
 use crate::frame_allocator::FrameTracker;
-use crate::get_frame_allocator;
 use crate::page::PTEFlags;
 use crate::page::PageTable;
 use crate::page::PageTableEntry;
@@ -19,13 +18,15 @@ use riscv::register::satp;
 pub struct MemorySet {
     page_table: PageTable,
     areas: Vec<MapArea>,
+    allocate_frame: FrameAllocFn,
 }
 
 impl MemorySet {
-    pub fn new_bare() -> Self {
+    pub fn new_bare(allocate_frame: FrameAllocFn) -> Self {
         Self {
-            page_table: PageTable::new(),
+            page_table: PageTable::new(allocate_frame),
             areas: Vec::new(),
+            allocate_frame,
         }
     }
 
@@ -45,7 +46,13 @@ impl MemorySet {
         permission: MapPermission,
     ) {
         self.push(
-            MapArea::new(start_va, end_va, MapType::Framed, permission),
+            MapArea::new(
+                start_va,
+                end_va,
+                MapType::Framed,
+                permission,
+                self.allocate_frame,
+            ),
             None,
         );
     }
@@ -126,8 +133,8 @@ impl MemorySet {
     //     )
     // }
 
-    pub fn from_existed_user(user_space: &MemorySet) -> MemorySet {
-        let mut memory_set = Self::new_bare();
+    pub fn from_existed_user(user_space: &MemorySet, allocate_frame: FrameAllocFn) -> Self {
+        let mut memory_set = Self::new_bare(allocate_frame);
         // map trampoline
         memory_set.map_trampoline();
         // copy data sections/trap_context/user_stack
@@ -170,6 +177,7 @@ pub struct MapArea {
     data_frames: BTreeMap<VirtPageNum, FrameTracker>,
     map_type: MapType,
     map_perm: MapPermission,
+    allocate_frame: FrameAllocFn,
 }
 
 impl MapArea {
@@ -178,6 +186,7 @@ impl MapArea {
         end_va: VirtAddr,
         map_type: MapType,
         map_perm: MapPermission,
+        allocate_frame: FrameAllocFn,
     ) -> Self {
         let start_vpn: VirtPageNum = start_va.floor();
         let end_vpn: VirtPageNum = end_va.ceil();
@@ -186,6 +195,7 @@ impl MapArea {
             data_frames: BTreeMap::new(),
             map_type,
             map_perm,
+            allocate_frame,
         }
     }
     pub fn from_another(another: &MapArea) -> Self {
@@ -194,6 +204,7 @@ impl MapArea {
             data_frames: BTreeMap::new(),
             map_type: another.map_type,
             map_perm: another.map_perm,
+            allocate_frame: another.allocate_frame,
         }
     }
     pub fn map_one(&mut self, page_table: &mut PageTable, vpn: VirtPageNum) {
@@ -203,7 +214,7 @@ impl MapArea {
                 ppn = PhysPageNum(vpn.0);
             }
             MapType::Framed => {
-                let frame = get_frame_allocator().frame_alloc().unwrap();
+                let frame = (self.allocate_frame)().unwrap();
                 ppn = frame.ppn;
                 self.data_frames.insert(vpn, frame);
             }

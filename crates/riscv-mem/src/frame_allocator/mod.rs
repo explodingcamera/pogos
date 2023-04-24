@@ -1,6 +1,9 @@
-use crate::{address::PhysPageNum, get_frame_allocator};
+use crate::address::PhysPageNum;
 use alloc::vec::Vec;
-use core::fmt::{self, Debug, Formatter};
+use core::{
+    fmt::{self, Debug, Formatter},
+    mem,
+};
 
 mod stack;
 pub use stack::StackFrameAllocator;
@@ -30,9 +33,17 @@ impl Debug for FrameTracker {
 
 impl Drop for FrameTracker {
     fn drop(&mut self) {
-        get_frame_allocator().frame_dealloc(self.ppn);
+        // this is a hack to prevent FrameTracker from being dropped
+        // without calling frame_dealloc, which would cause a memory leak.
+        // We don't have access to the allocator here, so we can't
+        // deallocate the page.
+        // idea from: https://faultlore.com/blah/linear-rust/
+
+        panic!("FrameTracker should not be dropped, use frame_dealloc instead");
     }
 }
+
+pub type FrameAllocFn = fn() -> Option<FrameTracker>;
 
 pub trait FrameAllocator {
     fn alloc(&mut self) -> Option<PhysPageNum>;
@@ -48,7 +59,12 @@ pub trait FrameAllocator {
             .map(|x| x.iter().map(|&t| FrameTracker::new(t)).collect())
     }
 
-    fn frame_dealloc(&mut self, ppn: PhysPageNum) {
+    fn frame_dealloc(&mut self, frame: FrameTracker) {
+        self.dealloc(frame.ppn);
+        mem::forget(frame);
+    }
+
+    fn frame_dealloc_ppm(&mut self, ppn: PhysPageNum) {
         self.dealloc(ppn);
     }
 }

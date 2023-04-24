@@ -1,3 +1,4 @@
+use crate::{io::MMIO_DEVICES, println, symbols::*};
 use alloc::sync::Arc;
 use riscv_mem::{
     address::VirtAddr,
@@ -5,8 +6,6 @@ use riscv_mem::{
     page::PageTable,
 };
 use spin::{Mutex, Once};
-
-use crate::{io::MMIO_DEVICES, println, symbols::*};
 
 // TODO: this might have issues with multiple cores and interrupts
 pub static KERNEL_SPACE: Once<Arc<MemorySet>> = Once::new();
@@ -22,11 +21,12 @@ pub fn init_kernel_memory_map() {
 }
 
 pub fn kernel_virt_to_phys(vaddr: usize) -> usize {
-    PageTable::from_token(
+    PageTable::new_from_token(
         KERNEL_SPACE
             .get()
             .expect("kernel memory map not initialized")
             .root_token(),
+        super::frame_alloc::alloc_fn,
     )
     .translate_va(VirtAddr::from(vaddr))
     .unwrap()
@@ -34,7 +34,7 @@ pub fn kernel_virt_to_phys(vaddr: usize) -> usize {
 }
 
 fn new_kernel() -> MemorySet {
-    let mut memory_set = MemorySet::new_bare();
+    let mut memory_set = MemorySet::new_bare(super::frame_alloc::alloc_fn);
 
     // println!("mapping .text section");
     memory_set.push(
@@ -43,6 +43,7 @@ fn new_kernel() -> MemorySet {
             (TEXT_END() - 1).into(),
             MapType::Identical,
             MapPermission::R | MapPermission::X,
+            super::frame_alloc::alloc_fn,
         ),
         None,
     );
@@ -58,6 +59,7 @@ fn new_kernel() -> MemorySet {
             (RODATA_END()).into(),
             MapType::Identical,
             MapPermission::R,
+            super::frame_alloc::alloc_fn,
         ),
         None,
     );
@@ -69,6 +71,7 @@ fn new_kernel() -> MemorySet {
             (DATA_END()).into(),
             MapType::Identical,
             MapPermission::R | MapPermission::W,
+            super::frame_alloc::alloc_fn,
         ),
         None,
     );
@@ -81,6 +84,7 @@ fn new_kernel() -> MemorySet {
             (BSS_END()).into(),
             MapType::Identical,
             MapPermission::R | MapPermission::W,
+            super::frame_alloc::alloc_fn,
         ),
         None,
     );
@@ -93,6 +97,7 @@ fn new_kernel() -> MemorySet {
             (STACK_START()).into(),
             MapType::Identical,
             MapPermission::R | MapPermission::W,
+            super::frame_alloc::alloc_fn,
         ),
         None,
     );
@@ -104,6 +109,7 @@ fn new_kernel() -> MemorySet {
             (MEMORY_END()).into(),
             MapType::Identical,
             MapPermission::R | MapPermission::W,
+            super::frame_alloc::alloc_fn,
         ),
         None,
     );
@@ -116,6 +122,7 @@ fn new_kernel() -> MemorySet {
                 (start + end).into(),
                 MapType::Identical,
                 MapPermission::R | MapPermission::W,
+                super::frame_alloc::alloc_fn,
             ),
             None,
         );

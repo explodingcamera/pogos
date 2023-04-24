@@ -1,6 +1,5 @@
-use bitflags::*;
-
 use crate::address::PhysPageNum;
+use bitflags::*;
 
 bitflags! {
     #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
