@@ -1,5 +1,5 @@
 use crate::address::{PhysAddr, PhysPageNum, StepByOne, VirtAddr, VirtPageNum};
-use crate::frame_allocator::{self, FrameAllocFn, FrameAllocator, FrameTracker};
+use crate::frame_allocator::{FrameAllocFn, FrameTracker};
 
 use alloc::string::String;
 use alloc::vec;

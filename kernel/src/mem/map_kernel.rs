@@ -1,4 +1,4 @@
-use crate::{io::MMIO_DEVICES, println, symbols::*};
+use crate::{dtb::DEVICE_TREE, io::MMIO_DEVICES, println, symbols::*};
 use alloc::sync::Arc;
 use riscv_mem::{
     address::VirtAddr,
@@ -127,6 +127,19 @@ fn new_kernel() -> MemorySet {
             None,
         );
     }
+
+    // println!("mapping device tree");
+    let device_tree = DEVICE_TREE.get().expect("device tree not initialized");
+    memory_set.push(
+        MapArea::new(
+            device_tree.start().into(),
+            device_tree.end().into(),
+            MapType::Identical,
+            MapPermission::R | MapPermission::W,
+            super::frame_alloc::alloc_fn,
+        ),
+        None,
+    );
 
     memory_set
 }

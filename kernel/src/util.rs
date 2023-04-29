@@ -12,10 +12,10 @@ macro_rules! print {
 
 #[macro_export]
 macro_rules! println {
-    ($fmt:literal$(, $($arg: tt)+)?) => {
+    ($fmt:literal$(, $($arg: tt)+)?) => {{
         $crate::print!($fmt $(,$($arg)+)?);
         $crate::util::print("\n");
-    };
+    }};
     () => {
         $crate::util::print("\n");
     }
@@ -69,6 +69,8 @@ impl Future for DebugConsole {
 pub async fn get_char() -> u8 {
     DebugConsole().await
 }
+
+pub type Result<T> = core::result::Result<T, &'static str>;
 
 // Not supported yet by any SBI implementation
 //

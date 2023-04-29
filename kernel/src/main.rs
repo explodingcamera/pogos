@@ -7,32 +7,33 @@
 extern crate alloc;
 extern crate riscv_rt;
 
-// enable our custom panic handler
 mod panic_handler;
-
-// handle interrupts and exceptions
 mod trap;
 
+mod dtb;
 mod io;
 mod ksched;
 mod mem;
 mod symbols;
 mod tasks;
+mod timer;
 mod util;
 
 use alloc::{boxed::Box, string::String, vec, vec::Vec};
 use riscv_rt::entry;
 use tasks::Fuse;
 
+// the entry point of the kernel, this is only called by hart 0.
+// the other harts are busy looping
 #[entry]
-fn main(hart_id: usize) -> ! {
-    if hart_id != 0 {
-        panic!("hart {} is not the boot hart, stopping", hart_id);
-    }
+fn main(a0: usize, a1: usize, a2: usize) -> ! {
+    let hart_id = a0;
 
-    println!();
     println!("== starting pogos kernel on hart {} ==", hart_id);
     println!();
+
+    // initialize the device tree
+    dtb::init(a1);
 
     // Setup everything required for the kernel to run
     unsafe {
@@ -47,10 +48,6 @@ fn main(hart_id: usize) -> ! {
         // initialize the kernel memory map
         mem::map_kernel::init_kernel_memory_map();
         println!(">>> kernel memory map initialized");
-
-        // todo: initialize mmu here
-        mem::init_mmu();
-        println!(">>> mmu enabled");
     }
 
     println!("kernel initialized, starting kschedule\n");

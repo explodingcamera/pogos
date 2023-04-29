@@ -154,15 +154,15 @@ impl MemorySet {
     }
 
     pub fn activate(&self) {
-        // println!("activate memory set");
-        // let satp = self.page_table.token();
         let asid = 0;
+        let ppn = self.page_table.root_ppn().into();
 
         unsafe {
-            satp::set(satp::Mode::Sv39, asid, self.root_ppn().into());
-            sfence_vma_all();
+            riscv::register::satp::set(satp::Mode::Sv39, asid, ppn);
+            riscv::asm::sfence_vma(0, 0);
         }
     }
+
     pub fn translate(&self, vpn: VirtPageNum) -> Option<PageTableEntry> {
         self.page_table.translate(vpn)
     }
