@@ -71,6 +71,10 @@ pub fn print_dtb() {
 }
 
 pub fn read(dtb_addr: usize) -> DeviceTree {
+    if dtb_addr == 0 {
+        panic!("device tree address is 0, unable to read device tree");
+    }
+
     // Get the actual size of the device tree after reading its header.
     let size = unsafe {
         let header = core::slice::from_raw_parts_mut(dtb_addr as *mut u8, DevTree::MIN_HEADER_SIZE);
