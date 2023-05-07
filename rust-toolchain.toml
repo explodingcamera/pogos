@@ -1,3 +1,3 @@
 [toolchain]
-channel = "nightly"
-components = ["rust-src"]
+channel = "nightly" # use the nightly version of Rust
+components = ["rust-src"] # we need this to build the alloc crate

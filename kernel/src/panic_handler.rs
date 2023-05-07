@@ -10,6 +10,9 @@ fn panic(info: &PanicInfo) -> ! {
 
     unsafe {
         println!("System reset failed");
-        unreachable_unchecked(); // this can pretty much only happen if there is a bug in the sbi implementation or if sbi is not present, unreachable_unchecked so we don't panic again
+
+        // this can pretty much only happen if there is a bug in the sbi implementation
+        // or if sbi is not present, unreachable_unchecked so we don't panic again
+        unreachable_unchecked();
     }
 }
