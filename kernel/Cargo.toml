@@ -17,3 +17,5 @@ sbi = "0.2"
 critical-section = {version = "1.1", default-features = false}
 portable-atomic = {version = "1.2", default-features = false, features = ["critical-section"]}
 spin = {version = "0.9", features = ["portable_atomic"]}
+
+linear-allocator = {path = "../crates/linear-allocator"}

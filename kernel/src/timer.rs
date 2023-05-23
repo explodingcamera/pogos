@@ -1,4 +1,10 @@
-use crate::util::Result;
+use riscv::register::{sip, stvec, time};
+use riscv_rt::pre_init;
+
+use crate::{
+    println,
+    util::{sstc, Result},
+};
 
 pub unsafe fn init_timer_interrupt() {
     use riscv::register::sie;
@@ -17,6 +23,9 @@ pub fn get_time() -> Result<u64> {
     Ok(riscv::register::time::read64() / (timebase_freq as u64 / 1000))
 }
 
-pub fn set_interrupt(time: u64) -> Result<()> {
-    sbi::timer::set_timer(time).map_err(|_| "set timer failed")
+pub fn set_interrupt(time: usize) -> Result<()> {
+    // sbi::timer::set_timer(time).map_err(|_| "set timer failed")
+    sstc::write(time::read() + time);
+
+    Ok(())
 }

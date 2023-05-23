@@ -1,4 +1,7 @@
+use core::arch::asm;
+
 use alloc::{string::String, vec::Vec};
+use riscv::asm;
 
 use crate::{ksched, print, println, util};
 
@@ -79,6 +82,9 @@ fn process_command(command: &str) {
             println!("  shutdown    shutdown the machine     (alias: sd, exit)");
             println!("  time        print current time       (alias: t)");
             println!("  devicetree  print the device tree    (alias: dt)");
+            println!("  panic       panic the kernel         (alias: p)");
+            println!("  exception   trigger an exception");
+            println!("  interrupt   cause a timer interrupt");
         }
         "time" | "t" => match crate::timer::get_time() {
             Ok(time) => println!("{}ms since boot", time),
@@ -86,6 +92,11 @@ fn process_command(command: &str) {
         },
         "devicetree" | "dt" => crate::dtb::print_dtb(),
         "shutdown" | "sd" | "exit" => util::shutdown(),
+        "panic" | "p" => panic!("panic requested by user"),
+        "exception" | "e" => unsafe {
+            asm!("ebreak");
+        },
+        "interrupt" | "i" => crate::timer::set_interrupt(0).unwrap(),
         "" => {}
         _ => {
             println!("unknown command: {command}");
