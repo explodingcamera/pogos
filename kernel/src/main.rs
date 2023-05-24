@@ -63,7 +63,7 @@ fn main(a0: usize, a1: usize, a2: usize) -> ! {
     println!("kernel initialized, starting kschedule\n");
 
     ksched::KernelScheduler::new()
-        .with_task(ksched::Task::new(tasks::console(), 0))
+        .with_task(ksched::Task::new(tasks::shell_task(), 0))
         .block_on_run();
 
     util::shutdown()

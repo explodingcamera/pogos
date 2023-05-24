@@ -3,4 +3,5 @@ members = [
   "kernel",
   "crates/riscv-mem",
   "crates/linear-allocator",
+  "crates/simple-shell",
 ]

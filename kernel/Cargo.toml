@@ -19,3 +19,4 @@ portable-atomic = {version = "1.2", default-features = false, features = ["criti
 spin = {version = "0.9", features = ["portable_atomic"]}
 
 linear-allocator = {path = "../crates/linear-allocator"}
+simple-shell = {path = "../crates/simple-shell"}
