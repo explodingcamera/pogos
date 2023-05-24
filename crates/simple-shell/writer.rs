@@ -1,6 +1,6 @@
 use core::fmt::Write;
 
-pub struct Writer {
+pub(crate) struct Writer {
     print: fn(&str),
 }
 

@@ -1,8 +1,6 @@
 #![no_std]
 extern crate alloc;
 
-use core::future::Future;
-
 use alloc::{
     collections::BTreeMap,
     string::{String, ToString},
@@ -10,122 +8,160 @@ use alloc::{
 };
 
 mod constants;
-pub mod writer;
+mod reader;
+mod writer;
 use constants::*;
+use reader::*;
 use writer::*;
 
 #[derive(Clone, Copy)]
-pub struct ShellCommand<'a, F>
-where
-    F: Future<Output = u8> + 'static,
-{
+pub struct ShellCommand<'a> {
     pub help: &'a str,
-    pub func: fn(&[&str], &mut Shell<'a, F>) -> Result<(), &'a str>,
+    pub func: fn(&[&str], &mut Shell<'a>) -> Result<(), &'a str>,
     pub aliases: &'a [&'a str],
 }
 
-pub struct Shell<'a, F>
-where
-    F: Future<Output = u8> + 'static,
-{
+pub struct Shell<'a> {
     pub history: Vec<String>,
-    pub commands: BTreeMap<&'a str, ShellCommand<'a, F>>,
+    pub commands: BTreeMap<&'a str, ShellCommand<'a>>,
     pub command: String,
     pub cursor: usize,
-    out: Writer,
-    read: fn() -> F,
+    write: Writer,
+    read: fn() -> Option<u8>,
 }
 
-impl<'a, F> Shell<'a, F>
-where
-    F: Future<Output = u8> + 'static,
-{
-    pub fn new(write: fn(&str), read: fn() -> F) -> Self
-    where
-        F: Future<Output = u8> + 'static,
-    {
+impl<'a> Shell<'a> {
+    pub fn new(write: fn(&str), read: fn() -> Option<u8>) -> Self {
         Self {
             history: Vec::new(),
             commands: BTreeMap::new(),
             command: String::new(),
             cursor: 0,
-            out: Writer::new(write),
+            write: Writer::new(write),
             read,
         }
     }
 
-    pub fn with_commands(mut self, mut commands: BTreeMap<&'a str, ShellCommand<'a, F>>) -> Self {
-        self.commands.append(&mut commands);
-        self
-    }
-
-    pub async fn run(&mut self) {
-        self.print_prompt();
-
+    fn get_char(&mut self) -> u8 {
         loop {
-            match (self.read)().await {
-                CTRL_C => self.process_command("exit".to_string()),
-                ESCAPE => self.handle_escape().await,
-                CTRL_L => {
-                    self.clear_screen();
-                    self.print_prompt();
-                    print!(self.out, "{}", self.command);
-                    self.cursor = self.command.len();
-                }
-                ENTER => {
-                    println!(self.out, "");
-                    self.process_command(self.command.clone());
-                    self.history.push(self.command.clone());
-                    self.command.clear();
-                    self.cursor = 0;
-                    self.print_prompt();
-                }
-                BACKSPACE => {
-                    if self.cursor > 0 {
-                        self.command.remove(self.cursor - 1);
-                        self.cursor -= 1;
-                        print!(self.out, "\x08"); // Move cursor left
-                        print!(self.out, "{}", &self.command[self.cursor..]); // Print the remaining text
-                        print!(self.out, " "); // Clear last character
-                        print!(self.out, "\x1b[{}D", self.command.len() - self.cursor + 1);
-                        // Move cursor to the correct position
-                    }
-                }
-                c if (32..=126).contains(&c) => {
-                    self.command.insert(self.cursor, c as char);
-                    self.cursor += 1;
-                    // print!("\x1b[K"); // Clear line from cursor position to the end
-                    if self.cursor < self.command.len() {
-                        // Print the remaining text
-                        print!(self.out, "{}", &self.command[self.cursor - 1..]);
-                        // Move cursor to the correct position
-                        print!(self.out, "\x1b[{}D", self.command.len() - self.cursor);
-                    } else {
-                        print!(self.out, "{}", c as char);
-                    }
-                }
-                _ => {}
+            if let Some(c) = (self.read)() {
+                return c;
             }
         }
     }
 
-    async fn handle_escape(&mut self) {
-        if (self.read)().await != CSI {
+    async fn get_char_async(&mut self) -> u8 {
+        (Reader::new(self.read)).await
+    }
+
+    pub fn with_commands(mut self, mut commands: BTreeMap<&'a str, ShellCommand<'a>>) -> Self {
+        self.commands.append(&mut commands);
+        self
+    }
+
+    pub fn run(&mut self) {
+        self.print_prompt();
+
+        loop {
+            let c = self.get_char();
+            match c {
+                ESCAPE => self.handle_escape(),
+                _ => self.match_char(c),
+            }
+        }
+    }
+
+    pub async fn run_async(&mut self) {
+        self.print_prompt();
+
+        loop {
+            let c = self.get_char_async().await;
+            match c {
+                ESCAPE => self.handle_escape_async().await,
+                _ => self.match_char(c),
+            }
+        }
+    }
+
+    fn match_char(&mut self, b: u8) {
+        match b {
+            CTRL_C => self.process_command("exit".to_string()),
+            CTRL_L => self.handle_clear(),
+            ENTER => self.handle_enter(),
+            BACKSPACE => self.handle_backspace(),
+            c if (32..=126).contains(&c) => {
+                self.command.insert(self.cursor, c as char);
+                self.cursor += 1;
+
+                if self.cursor < self.command.len() {
+                    // Print the remaining text
+                    print!(self.write, "{}", &self.command[self.cursor - 1..]);
+                    // Move cursor to the correct position
+                    print!(self.write, "\x1b[{}D", self.command.len() - self.cursor);
+                } else {
+                    print!(self.write, "{}", c as char);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    fn handle_clear(&mut self) {
+        self.clear_screen();
+        self.print_prompt();
+        print!(self.write, "{}", self.command);
+        self.cursor = self.command.len();
+    }
+
+    fn handle_backspace(&mut self) {
+        if self.cursor > 0 {
+            self.command.remove(self.cursor - 1);
+            self.cursor -= 1;
+            print!(self.write, "\x08"); // Move cursor left
+            print!(self.write, "{}", &self.command[self.cursor..]); // Print the remaining text
+            print!(self.write, " "); // Clear last character
+            print!(self.write, "\x1b[{}D", self.command.len() - self.cursor + 1);
+            // Move cursor to the correct position
+        }
+    }
+
+    fn handle_enter(&mut self) {
+        println!(self.write, "");
+        self.process_command(self.command.clone());
+        self.history.push(self.command.clone());
+        self.command.clear();
+        self.cursor = 0;
+        self.print_prompt();
+    }
+    async fn handle_escape_async(&mut self) {
+        if self.get_char_async().await != CSI {
             return;
         }
+        let b = self.get_char_async().await;
+        self._handle_escape(b);
+    }
 
-        match (self.read)().await {
+    fn handle_escape(&mut self) {
+        if self.get_char() != CSI {
+            return;
+        }
+        let b = self.get_char();
+        self._handle_escape(b);
+    }
+
+    fn _handle_escape(&mut self, b: u8) {
+        match b {
             CSI_UP => {}
             CSI_DOWN => {}
             CSI_RIGHT => {
                 if self.cursor < self.command.len() {
-                    print!(self.out, "\x1b[1C");
+                    print!(self.write, "\x1b[1C");
                     self.cursor += 1;
                 }
             }
             CSI_LEFT => {
                 if self.cursor > 0 {
-                    print!(self.out, "\x1b[1D");
+                    print!(self.write, "\x1b[1D");
                     self.cursor -= 1;
                 }
             }
@@ -141,7 +177,7 @@ where
         for (name, shell_command) in &self.commands {
             if shell_command.aliases.contains(&command) || name == &command {
                 return (shell_command.func)(&args, self).unwrap_or_else(|err| {
-                    println!(self.out, "{}: {}", command, err);
+                    println!(self.write, "{}: {}", command, err);
                 });
             }
         }
@@ -150,25 +186,25 @@ where
             return;
         }
 
-        println!(self.out, "{}: command not found", command);
+        println!(self.write, "{}: command not found", command);
     }
 
     pub fn print_help_screen(&mut self) {
-        println!(self.out, "available commands:");
+        println!(self.write, "available commands:");
         for (name, command) in &self.commands {
-            print!(self.out, "  {:<12}{:<25}", name, command.help);
+            print!(self.write, "  {:<12}{:<25}", name, command.help);
             if !command.aliases.is_empty() {
-                print!(self.out, "    aliases: {}", command.aliases.join(", "));
+                print!(self.write, "    aliases: {}", command.aliases.join(", "));
             }
-            println!(self.out, "");
+            println!(self.write, "");
         }
     }
 
     pub fn print_prompt(&mut self) {
-        print!(self.out, "> ");
+        print!(self.write, "> ");
     }
 
     pub fn clear_screen(&mut self) {
-        print!(self.out, "\x1b[2J\x1b[1;1H");
+        print!(self.write, "\x1b[2J\x1b[1;1H");
     }
 }

@@ -40,6 +40,10 @@ pub fn print(t: &str) {
     });
 }
 
+pub fn read() -> Option<u8> {
+    sbi::legacy::console_getchar()
+}
+
 struct DebugConsole();
 impl Future for DebugConsole {
     type Output = u8;

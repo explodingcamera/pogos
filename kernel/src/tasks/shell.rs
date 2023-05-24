@@ -6,17 +6,17 @@ use simple_shell::{Shell, ShellCommand};
 
 use crate::{
     ksched, print, println,
-    util::{self, print, Result},
+    util::{self, print, read, Result},
 };
 
 pub async fn shell_task() -> ksched::TaskResult {
     let mut shell = create_shell();
-    shell.run().await;
+    shell.run_async().await;
     ksched::TaskResult::Exit
 }
 
-pub fn create_shell<'a>() -> Shell<'a, impl core::future::Future<Output = u8>> {
-    let mut shell = Shell::new(print, util::get_char);
+pub fn create_shell<'a>() -> Shell<'a> {
+    let mut shell = Shell::new(print, read);
     let mut commands = BTreeMap::new();
 
     commands.insert(
