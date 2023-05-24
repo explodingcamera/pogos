@@ -85,7 +85,7 @@ pub fn read(dtb_addr: usize) -> DeviceTree {
     let buf = unsafe { core::slice::from_raw_parts(dtb_addr as *mut u8, size) };
 
     // Create the device tree handle
-    let devtree = unsafe { DevTree::new(&buf).expect("failed to create device tree handle") };
+    let devtree = unsafe { DevTree::new(buf).expect("failed to create device tree handle") };
 
     DeviceTree(devtree)
 }

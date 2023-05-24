@@ -12,7 +12,6 @@ use crate::PAGE_SIZE;
 use alloc::collections::BTreeMap;
 use alloc::vec::Vec;
 use bitflags::bitflags;
-use riscv::asm::sfence_vma_all;
 use riscv::register::satp;
 
 pub struct MemorySet {
