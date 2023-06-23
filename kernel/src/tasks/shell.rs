@@ -23,7 +23,10 @@ pub fn create_shell<'a>() -> Shell<'a> {
         "help",
         ShellCommand {
             help: "print this help message",
-            func: |_, shell| Ok(shell.print_help_screen()),
+            func: |_, shell| {
+                shell.print_help_screen();
+                Ok(())
+            },
             aliases: &["?", "h"],
         },
     );
@@ -56,7 +59,10 @@ pub fn create_shell<'a>() -> Shell<'a> {
         "clear",
         ShellCommand {
             help: "clear the screen",
-            func: |_, shell| Ok(shell.clear_screen()),
+            func: |_, shell| {
+                shell.clear_screen();
+                Ok(())
+            },
             aliases: &["cls"],
         },
     );
@@ -89,7 +95,10 @@ pub fn create_shell<'a>() -> Shell<'a> {
         "exception",
         ShellCommand {
             help: "trigger an exception",
-            func: |_, _| Ok(unsafe { asm!("ebreak") }),
+            func: |_, _| {
+                unsafe { asm!("ebreak") };
+                Ok(())
+            },
             aliases: &[],
         },
     );
@@ -107,7 +116,10 @@ pub fn create_shell<'a>() -> Shell<'a> {
         "devicetree",
         ShellCommand {
             help: "print the device tree",
-            func: |_, _| Ok(crate::dtb::print_dtb()),
+            func: |_, _| {
+                crate::dtb::print_dtb();
+                Ok(())
+            },
             aliases: &["dt"],
         },
     );

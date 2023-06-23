@@ -5,3 +5,4 @@ members = [
   "crates/linear-allocator",
   "crates/simple-shell",
 ]
+resolver = "2"
