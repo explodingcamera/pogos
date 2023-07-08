@@ -62,9 +62,53 @@ fn main(a0: usize, a1: usize, a2: usize) -> ! {
 
     println!("kernel initialized, starting kschedule\n");
 
-    ksched::KernelScheduler::new()
-        .with_task(ksched::Task::new(tasks::shell_task(), 0))
-        .block_on_run();
+    // ksched::KernelScheduler::new()
+    //     .with_task(ksched::Task::new(tasks::shell_task(), 0))
+    //     .block_on_run();
 
-    util::shutdown()
+    // util::shutdown()
+
+    start_shell()
+}
+
+pub const ENTER: u8 = 13;
+pub const BACKSPACE: u8 = 127;
+
+pub fn start_shell() -> ! {
+    print!("> ");
+
+    let mut command = String::new(); // finnaly, we can use heap allocated strings!
+
+    loop {
+        match sbi::legacy::console_getchar() {
+            Some(ENTER) => {
+                println!();
+                process_command(&command);
+                command.clear();
+                print!("> ");
+            }
+            Some(c) => {
+                if c >= 32 && c <= 126 {
+                    command.push(c as char);
+                    print!("{}", c as char);
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+fn process_command(command: &str) {
+    match command {
+        "help" | "?" | "h" => {
+            println!("available commands:");
+            println!("  help      print this help message  (alias: h, ?)");
+            println!("  shutdown  shutdown the machine     (alias: sd, exit)");
+        }
+        "shutdown" | "sd" | "exit" => util::shutdown(),
+        "" => {}
+        _ => {
+            println!("unknown command: {command}");
+        }
+    };
 }
