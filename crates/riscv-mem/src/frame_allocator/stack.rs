@@ -41,7 +41,7 @@ impl FrameAllocator for StackFrameAllocator {
         }
     }
 
-    fn alloc_more(&mut self, pages: usize) -> Option<Vec<PhysPageNum>> {
+    fn alloc_multiple(&mut self, pages: usize) -> Option<Vec<PhysPageNum>> {
         if self.current + pages >= self.end {
             None
         } else {

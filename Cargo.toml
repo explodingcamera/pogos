@@ -2,6 +2,7 @@
 members = [
   "kernel",
   "crates/riscv-mem",
+  "crates/mem",
   "crates/linear-allocator",
   "crates/simple-shell",
 ]

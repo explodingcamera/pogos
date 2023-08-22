@@ -47,7 +47,18 @@ pub type FrameAllocFn = fn() -> Option<FrameTracker>;
 
 pub trait FrameAllocator {
     fn alloc(&mut self) -> Option<PhysPageNum>;
-    fn alloc_more(&mut self, pages: usize) -> Option<Vec<PhysPageNum>>;
+    fn alloc_multiple(&mut self, pages: usize) -> Option<Vec<PhysPageNum>> {
+        let mut v = Vec::new();
+        for _ in 0..pages {
+            if let Some(ppn) = self.alloc() {
+                v.push(ppn);
+            } else {
+                return None;
+            }
+        }
+        Some(v)
+    }
+
     fn dealloc(&mut self, ppn: PhysPageNum);
 
     fn frame_alloc(&mut self) -> Option<FrameTracker> {
@@ -55,7 +66,7 @@ pub trait FrameAllocator {
     }
 
     fn frame_alloc_more(&mut self, num: usize) -> Option<Vec<FrameTracker>> {
-        self.alloc_more(num)
+        self.alloc_multiple(num)
             .map(|x| x.iter().map(|&t| FrameTracker::new(t)).collect())
     }
 

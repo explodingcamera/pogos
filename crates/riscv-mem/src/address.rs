@@ -10,19 +10,15 @@ const PPN_WIDTH_SV39: usize = PA_WIDTH_SV39 - PAGE_SIZE_BITS;
 const VPN_WIDTH_SV39: usize = VA_WIDTH_SV39 - PAGE_SIZE_BITS;
 
 /// Definitions
-#[repr(C)]
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub struct PhysAddr(pub usize);
 
-#[repr(C)]
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub struct VirtAddr(pub usize);
 
-#[repr(C)]
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Default)]
 pub struct PhysPageNum(pub usize);
 
-#[repr(C)]
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub struct VirtPageNum(pub usize);
 
@@ -48,10 +44,6 @@ impl Debug for PhysPageNum {
         f.write_fmt(format_args!("PPN:{:#x}", self.0))
     }
 }
-
-/// T: {PhysAddr, VirtAddr, PhysPageNum, VirtPageNum}
-/// T -> usize: T.0
-/// usize -> T: usize.into()
 
 impl From<usize> for PhysAddr {
     fn from(v: usize) -> Self {
@@ -193,6 +185,7 @@ impl StepByOne for VirtPageNum {
         self.0 += 1;
     }
 }
+
 impl StepByOne for PhysPageNum {
     fn step(&mut self) {
         self.0 += 1;
