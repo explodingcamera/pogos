@@ -53,7 +53,7 @@ unsafe impl GlobalAlloc for LinearAllocator {
         }
 
         self.head.store(new_head, Ordering::Relaxed);
-        NonNull::new_unchecked(self.start.add(head) as *mut u8).as_ptr()
+        NonNull::new_unchecked(self.start.add(head)).as_ptr()
     }
 
     unsafe fn dealloc(&self, _ptr: *mut u8, _layout: Layout) {
