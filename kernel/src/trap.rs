@@ -12,11 +12,6 @@ fn default_handler() {
     println!("Default handler called\n");
 }
 
-// #[export_name = "DefaultInterruptHandler"]
-// fn default_interrupt_handler() {
-//     println!("DefaultInterruptHandler called\n");
-// }
-
 #[export_name = "SupervisorTimer"]
 fn supervisor_timer_handler() {
     println!("SupervisorTimer called");

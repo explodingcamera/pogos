@@ -4,7 +4,7 @@ use crate::println;
 
 #[global_allocator]
 static KERNEL_HEAP_ALLOCATOR: LockedHeap<32> = LockedHeap::new();
-static mut KERNEL_HEAP: [u8; 0x20000] = [0; 0x20000]; // virtual memory is a bit easier if it's in the .bss section (no need to map it)
+static mut KERNEL_HEAP: [u8; 0x20000] = [0; 0x20000];
 
 /// Initialize the heap allocator.
 pub unsafe fn init_kernel_heap() {

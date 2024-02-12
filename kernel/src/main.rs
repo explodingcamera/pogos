@@ -1,8 +1,5 @@
 #![no_std]
 #![no_main]
-#![feature(panic_info_message)]
-#![feature(async_fn_in_trait)]
-#![feature(lazy_cell)]
 #![allow(unused)]
 
 extern crate alloc;
@@ -50,14 +47,6 @@ fn main(a0: usize, a1: usize, a2: usize) -> ! {
         // initialize the kernel heap allocator, alloc is now available
         mem::heap_alloc::init_kernel_heap();
         println!(">>> kernel heap initialized");
-
-        // initialize the frame allocator
-        mem::frame_alloc::init_frame_allocator();
-        println!(">>> frame allocator initialized");
-
-        // initialize the kernel memory map
-        mem::map_kernel::init_kernel_memory_map();
-        println!(">>> kernel memory map initialized");
     }
 
     println!("kernel initialized, starting kschedule\n");

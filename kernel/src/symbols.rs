@@ -1,33 +1,39 @@
 #![allow(non_snake_case, dead_code)]
 
 extern "C" {
-    pub static _stext: u8;
-    pub static _etext: u8;
+    static _stext: u8;
 
-    pub static _srodata: u8;
-    pub static _erodata: u8;
+    static _stack_start: u8;
+    static _max_hart_id: u8;
+    static _hart_stack_size: u8;
+    static _heap_size: u8;
 
-    pub static _sdata: u8;
-    pub static _edata: u8;
+    static pog_memory_start: u8;
+    static pog_memory_end: u8;
+    static pog_etext: u8;
+    static pog_srodata: u8;
+    static pog_erodata: u8;
 
-    pub static _sbss: u8;
-    pub static _ebss: u8;
+    static _sdata: u8;
+    static _edata: u8;
+    static _sbss: u8;
+    static _ebss: u8;
+    static _sheap: u8;
+    static _eheap: u8;
 
-    pub static _sstack: u8;
-    pub static _estack: u8;
+    // note that the stack grows downwards
+    static _sstack: u8;
+    static _estack: u8;
 
-    pub static _memory_start: u8;
-    pub static _memory_end: u8;
-
-    pub static _end: u8;
+    static _end: u8;
 }
 
 pub fn MEMORY_START() -> usize {
-    unsafe { &_memory_start as *const _ as usize }
+    unsafe { &pog_memory_start as *const _ as usize }
 }
 
 pub fn MEMORY_END() -> usize {
-    unsafe { &_memory_end as *const _ as usize }
+    unsafe { &pog_memory_end as *const _ as usize }
 }
 
 pub fn TEXT_START() -> usize {
@@ -35,15 +41,15 @@ pub fn TEXT_START() -> usize {
 }
 
 pub fn TEXT_END() -> usize {
-    unsafe { &_etext as *const _ as usize }
+    unsafe { &pog_etext as *const _ as usize }
 }
 
 pub fn RODATA_START() -> usize {
-    unsafe { &_srodata as *const _ as usize }
+    unsafe { &pog_srodata as *const _ as usize }
 }
 
 pub fn RODATA_END() -> usize {
-    unsafe { &_erodata as *const _ as usize }
+    unsafe { &pog_erodata as *const _ as usize }
 }
 
 pub fn DATA_START() -> usize {

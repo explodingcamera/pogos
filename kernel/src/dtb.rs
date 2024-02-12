@@ -92,6 +92,5 @@ pub fn read(dtb_addr: usize) -> DeviceTree {
 
 pub fn init(dtb_addr: usize) {
     DEVICE_TREE.call_once(|| read(dtb_addr));
-
     println!(">>> device tree initialized");
 }

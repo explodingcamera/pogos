@@ -1,9 +1,4 @@
 [workspace]
-members = [
-  "kernel",
-  "crates/riscv-mem",
-  "crates/mem",
-  "crates/linear-allocator",
-  "crates/simple-shell",
-]
-resolver = "2"
+members=["kernel", "crates/*"]
+default-members=["kernel"]
+resolver="2"

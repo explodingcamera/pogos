@@ -6,7 +6,7 @@ use simple_shell::{Shell, ShellCommand};
 
 use crate::{
     ksched, print, println,
-    util::{self, print, read, Result},
+    util::{self, Result, SBIConsole},
 };
 
 pub async fn shell_task() -> ksched::TaskResult {
@@ -16,7 +16,7 @@ pub async fn shell_task() -> ksched::TaskResult {
 }
 
 pub fn create_shell<'a>() -> Shell<'a> {
-    let mut shell = Shell::new(print, read);
+    let mut shell = Shell::new(SBIConsole::print, SBIConsole::read_byte);
     let mut commands = BTreeMap::new();
 
     commands.insert(
