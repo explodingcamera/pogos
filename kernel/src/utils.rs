@@ -1,7 +1,7 @@
+/// Print a string to the (legacy) debug console
 pub fn print(t: &str) {
-    t.chars().for_each(
-        |c| sbi::legacy::console_putchar(c.try_into().unwrap_or(b'?')), // TODO: replace with the new SBI debug extension once it's available in all SBI implementations
-    );
+    t.chars()
+        .for_each(|c| sbi::legacy::console_putchar(c.try_into().unwrap_or(b'?')));
 }
 
 struct Writer {}

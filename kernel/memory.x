@@ -1,7 +1,6 @@
 MEMORY
 {
   RAM : ORIGIN = 0x80200000, LENGTH = 16M
-  /* 16MB ought to be enough for anyone */
 }
 
 REGION_ALIAS("REGION_TEXT", RAM);

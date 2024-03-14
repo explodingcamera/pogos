@@ -1,10 +1,8 @@
 [package]
-edition = "2021"
-name = "kernel"
-version = "0.1.0"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+edition="2021"
+name="kernel"
+version="0.1.0"
 
 [dependencies]
-riscv-rt = {version = "0.11", features = ["s-mode"]}
-sbi = "0.2"
+riscv-rt={version="0.12", features=["s-mode"]}
+sbi="0.2"
